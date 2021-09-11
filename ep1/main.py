@@ -1,111 +1,117 @@
 import math
-from typing import Callable
+from typing import Callable, NamedTuple
 
 
-sign = lambda a: (a > 0) - (a < 0)
+class classproperty(property):
+    def __get__(self, cls, owner):
+        return classmethod(self.fget).__get__(None, owner)()
+
+
+class Point(NamedTuple):
+    x: float
+    y: float
+
+    def getTuple(self):
+        return self.x, self.y
 
 
 class FunctionApproximation:
+    @staticmethod
+    def sign(x: float) -> int:
+        return (x > 0) - (x < 0)
 
-    def __init__(self, f: Callable[[float], float], a0: float, b0: float) -> None:
+    _base_epsilon = None
 
-        if sign(f(a0)) == sign(f(b0)):
-            raise Exception("Expected antipodal points!")
-
-        self.f = f
-        self.a = a0
-        self.b = b0
-        eps = 1.0
-        while eps + 1 > 1:
-            eps /= 2
-        self._base_eps = eps
+    @classproperty
+    def floatEpsilon(cls):
+        if cls._base_epsilon is None:
+            eps = 1.0
+            while eps + 1 > 1:
+                eps /= 2
+            cls._base_epsilon = eps
+        return cls._base_epsilon
 
     # get the least measurable difference around x
-    def getEpsilon(self, x: float) -> float:
-        mag = math.floor(math.log2(math.fabs(x))) + 1
-        return self._base_eps * (2 ** mag)
+    @classmethod
+    def getEpsilon(cls, x: float) -> float:
+        mag = math.floor(math.log2(math.fabs(x))) + 1 if x != 0 else 0
+        return cls.floatEpsilon * (2 ** mag)
 
-    def isBelowThreshold(self, x1: float, x2: float) -> bool:
-        return math.fabs(x2 - x1) <= self.getEpsilon(math.fabs(x1))
+    @classmethod
+    def isBelowThreshold(cls, x1: float, x2: float) -> bool:
+        return math.fabs(x2 - x1) <= cls.getEpsilon(math.fabs(x1))
 
-    def secantLine(self, x1: float, x2: float) -> Callable[[float], float]:
-        return (f(x2) - f(x1))/(x2 - x1)
+    @staticmethod
+    def midpoint(x1: float, x2: float) -> float:
+        return (x1 + x2)/2
 
-    def secantMethod(self, a: float, b: float, c: float) -> float:
-        # (f(x_k) - f(x_n))/(x_k+1 - x_k) = (f(x2) - f(x1))/(x2 - x1)
-        #secant = self.secantLine(x1, x2)
+    @classmethod
+    def secantMethod(cls, point_a: Point, point_b: Point, point_c: Point) -> float:
 
-        #if secant == 0:
-        #    return bisectionMethod(x1, x2)
+        a = point_a.x
+        b, fb = point_b.getTuple()
+        c, fc = point_c.getTuple()
+        # this shouldn't be much overhead
+        m = cls.midpoint(a, b)
 
-        #return x2 - (1/secant) * self.f(x2)
-
-        m = self.bisectionMethod(a, b)
-
-        p = (b - c) * self.f(b)
-        if p >= 0:
-            q = self.f(c) - self.f(b)
-        else:
-            q = self.f(b) - self.f(c)
-            p = -p
+        p = (b - c) * fb
+        p_sign = cls.sign(p)
+        q = p_sign * (fc - fb)
+        p = p_sign * p
 
         # if the numerator is less than the denominator
         # we won't ever divide by zero!
-        if p <= self.getEpsilon(q):
-            return b + sign(a - b) * self.getEpsilon(b)
+        if p <= cls.getEpsilon(q):
+            return b + cls.sign(a - b) * cls.getEpsilon(b)
         elif p <= (m - b) * q:
             # secant
             return b + p/q
         else:
+            # midpoint
             return m
 
-    def bisectionMethod(self, x1: float, x2: float) -> float:
-        return (x1 + x2)/2
+    @classmethod
+    def dekkerMethod(cls, f: Callable[[float], float], a: float, b: float) -> float:
+        if cls.sign(f(a)) == cls.sign(f(b)):
+            raise Exception("Expected antipodal points!")
 
-    def dekkerMethod(self, a: float = None, b: float = None) -> float:
         # b is the best zero so far
-        b = b if b is not None else self.b
-        fb = self.f(b)
-        # (a,fa) should be antipodal to (b,fb) all the time
+        point_b = Point(b, f(b))
+        # (a, f(a)) should be antipodal to (b, f(b)) all the time
         # so that [a, b] contains the wanted root
-        a = a if a is not None else self.a
-        fa = self.f(a)
+        point_a = Point(a, f(a))
         # c is the previous value of b
-        c = a
-        fc = fa
+        point_c = Point(a, f(a))
 
         while True:
             # if they're the same sign, a should be c
-            if sign(fa) == sign(fb):
-                a = c
-                fa = fc
+            if cls.sign(point_a.y) == cls.sign(point_b.y):
+                point_a = point_c
 
             # fb should always be the smallest value
-            if math.fabs(fa) < math.fabs(fb):
-                c, b, a = b, a, c
-                fc, fb, fa = fb, fa, fc
+            if math.fabs(point_a.y) < math.fabs(point_b.y):
+                point_c = point_b
+                point_b = point_a
+                point_a = point_c
 
-            m = self.bisectionMethod(a, b)
+            m = cls.midpoint(point_a.x, point_b.x)
 
-            if self.isBelowThreshold(m, b):
+            if cls.isBelowThreshold(m, point_b.x):
                 break
 
-            s = self.secantMethod(a, b, c)
+            s = cls.secantMethod(point_a, point_b, point_c)
 
             # record previous point
-            c = b
-            fc = fb
+            point_c = point_b
             # then update the best root
-            b = s
-            fb = self.f(b)
+            point_b = Point(s, f(s))
 
-        return b
+        return point_b.x
 
 
 def main(args: list[str]) -> None:
     if len(args) == 0:
-        approx = FunctionApproximation(lambda x: 1/(x - 3) - 6, 3.1, 3.4)
-        print(approx.dekkerMethod())
+        print(FunctionApproximation.dekkerMethod(lambda x: 1/(x - 3) - 6, 3.1, 3.4))
     pass
 
 
