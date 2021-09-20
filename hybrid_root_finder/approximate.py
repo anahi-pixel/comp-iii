@@ -77,6 +77,11 @@ class FunctionApproximation:
         # c is the previous value of b
         point_c = Point(a, f(a))
 
+        previous_m = cls.midpoint(point_a.x, point_b.x) + 1
+        previous_x = point_b.x + 1
+
+        slow_convergence_limit = 1000
+
         while True:
             # if they're the same sign, a should be c
             if cls.sign(point_a.y) == cls.sign(point_b.y):
@@ -92,6 +97,15 @@ class FunctionApproximation:
 
             if cls.isBelowThreshold(m, point_b.x):
                 break
+
+            if (m == previous_m and point_b.x == previous_x) or slow_convergence_limit <= 0:
+                raise Exception("This interval won't converge")
+
+            if cls.isBelowThreshold(m, previous_m) and cls.isBelowThreshold(point_b.x, previous_x):
+                slow_convergence_limit -= 1
+
+            previous_m = m
+            previous_x = point_b.x
 
             s = cls.secantMethod(point_a, point_b, point_c)
 
