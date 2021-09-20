@@ -11,6 +11,15 @@ def main(args: list[str]) -> None:
             -2, 0  # search interval
         )
         print(approx)
+        return
+
+    function = FUNCTIONS[int(args[0])]
+    print(function.meta)
+    approx = FunctionApproximation.dekkerMethod(
+        function.function(1, 10),  # m = 1, g = 10
+        -2, 2  # search interval
+    )
+    print(approx)
 
 
 if __name__ == '__main__':

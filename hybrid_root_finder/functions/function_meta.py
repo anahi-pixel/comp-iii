@@ -14,3 +14,8 @@ class ContinuousFunctionMeta:
 class ContinuousFunction:
     meta: ContinuousFunctionMeta
     function: Callable
+    boundaries: list[Point] = None
+
+    def __post_init__(self):
+        if self.boundaries is not None:
+            self.function = self.function(self.boundaries)

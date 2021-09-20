@@ -1,6 +1,8 @@
-from .physics import TEST_FUNCTION
+from .physics import (TEST_FUNCTION,
+                      FALLING_BODY_SPEED_FUNCTION)
 
 
 FUNCTIONS = [
-    TEST_FUNCTION
+    TEST_FUNCTION,
+    FALLING_BODY_SPEED_FUNCTION
 ]
