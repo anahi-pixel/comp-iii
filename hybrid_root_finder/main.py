@@ -1,3 +1,4 @@
+#!/usr/bin/python
 from approximate import FunctionApproximation
 from functions import FUNCTIONS
 from dataclasses import dataclass
