@@ -1,18 +1,12 @@
 import math
-from typing import Callable, NamedTuple
+from typing import Callable
+
+from point import Point
 
 
 class classproperty(property):
     def __get__(self, cls, owner):
         return classmethod(self.fget).__get__(None, owner)()
-
-
-class Point(NamedTuple):
-    x: float
-    y: float
-
-    def getTuple(self):
-        return self.x, self.y
 
 
 class FunctionApproximation:
@@ -109,13 +103,5 @@ class FunctionApproximation:
         return point_b.x
 
 
-def main(args: list[str]) -> None:
-    if len(args) == 0:
-        print(FunctionApproximation.dekkerMethod(lambda x: 1/(x - 3) - 6, 3.1, 3.4))
-    pass
-
-
 if __name__ == '__main__':
-    import sys
-
-    main(sys.argv[1:])
+    print(FunctionApproximation.dekkerMethod(lambda x: 1/(x - 3) - 6, 3.1, 3.4))
