@@ -14,6 +14,8 @@ class ContinuousFunctionMeta:
 class ContinuousFunction:
     meta: ContinuousFunctionMeta
     function: Callable
+    constants: list[float]
+    interval: list[float]
     boundaries: list[Point] = None
 
     def __post_init__(self):

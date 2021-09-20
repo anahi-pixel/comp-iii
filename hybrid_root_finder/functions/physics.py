@@ -16,7 +16,9 @@ TEST_FUNCTION = ContinuousFunction(
         "Test function",
         "Function used for testing under normal conditions"
     ),
-    testFunction
+    testFunction,
+    [1, 10],
+    [-1, 0]
 )
 
 def _fallingBodySpeed(boundaries: list[Point]):
@@ -34,6 +36,8 @@ FALLING_BODY_SPEED_FUNCTION = ContinuousFunction(
         "This models the speed of a falling body under air resistance"
     ),
     _fallingBodySpeed,
+    [1, 10],
+    [-1, 1],
     [
         Point(0, 3),
         Point(2, 20)
