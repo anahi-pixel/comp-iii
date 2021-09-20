@@ -49,16 +49,39 @@ def main(params: Params) -> None:
     print()
     print('> Calculating...')
 
-    approx = FunctionApproximation.dekkerMethod(
-        function.function(*params.constants),
-        *params.interval
+    if params.function < 3:
+        approx = FunctionApproximation.dekkerMethod(
+            function.function(*params.constants),
+            *params.interval
         )
 
-    print('> Done!')
-    print()
+        print('> Done!')
+        print()
 
-    print('For the interval:', tuple(params.interval))
-    print('Dekker method found a zero at:', approx)
+        print('For the interval:', tuple(params.interval))
+        print('Dekker method found a zero at:', approx)
+    else:
+        roots = []
+        steps = 100
+        delta = (params.interval[1] - params.interval[0]) / steps
+        intervals = [(delta * i, delta * (i + 1)) for i in range(steps)]
+        for a, b in intervals:
+            try:
+                new_root = FunctionApproximation.dekkerMethod(
+                    function.function,
+                    a, b
+                )
+                roots.append([new_root, (a, b)])
+
+            except Exception as e:
+                print('Could not find root for', (a, b))
+
+        print('> Done!')
+        print()
+
+        for r, interval in roots:
+            print('For the interval:', interval)
+            print('Dekker method found a zero at:', r)
 
 
 if __name__ == '__main__':
