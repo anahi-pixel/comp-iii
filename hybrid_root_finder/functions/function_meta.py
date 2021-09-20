@@ -11,9 +11,13 @@ class ContinuousFunctionMeta:
 
 
 @dataclass
-class ContinuousFunction:
+class ContinuousFunctionBase:
     meta: ContinuousFunctionMeta
     function: Callable
+
+
+@dataclass
+class ContinuousFunction(ContinuousFunctionBase):
     constants: list[float]
     interval: list[float]
     boundaries: list[Point] = None
