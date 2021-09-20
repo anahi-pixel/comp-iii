@@ -1,8 +1,9 @@
 from .physics import (TEST_FUNCTION,
-                      FALLING_BODY_SPEED_FUNCTION)
+                      FALLING_BODY_SPEED_FUNCTION,
+                      WIRE_HEIGHT_FUNCTION)
 
 
 FUNCTIONS = [
-    TEST_FUNCTION,
-    FALLING_BODY_SPEED_FUNCTION
+    FALLING_BODY_SPEED_FUNCTION,
+    WIRE_HEIGHT_FUNCTION
 ]

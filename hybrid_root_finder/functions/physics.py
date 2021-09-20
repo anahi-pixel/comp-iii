@@ -39,3 +39,26 @@ FALLING_BODY_SPEED_FUNCTION = ContinuousFunction(
         Point(2, 20)
     ]
 )
+
+def _wireHeight(boundaries: list[Point]):
+    def wireHeight(delta: float) -> Callable[[float], float]:
+        def f(x: float) -> float:
+            return x * math.cosh(boundaries[1].x / x) - x * math.cosh(boundaries[0].x / x) - delta
+
+        return f
+
+    return wireHeight
+
+WIRE_HEIGHT_FUNCTION = ContinuousFunction(
+    ContinuousFunctionMeta(
+        "Wire height",
+        "This function models the height of a wire hanging between two poles"
+    ),
+    _wireHeight,
+    [0.5],
+    [99, 101],
+    [
+        Point(0, 0),
+        Point(10, 10)
+    ]
+)
